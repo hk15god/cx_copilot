@@ -8,7 +8,7 @@ const CUZOR_KB = `
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "CALL_LLM") {
     // UPDATED for 2026: Using Gemini 2.5 Flash
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
     const promptText = `${CUZOR_KB}\n\nCustomer Ticket: ${request.ticket}\nAgent Hint: ${request.agentHint}\n\nDraft a professional reply:`;
 
