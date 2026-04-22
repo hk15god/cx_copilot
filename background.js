@@ -1,36 +1,41 @@
-// background.js
-const API_KEY = "YOUR_API_KEY"; 
+const API_KEY = "AIzaSyCTbHgFNFzpOY-pg314xxIsk752471Tm9o"; // Replace with your actual API key
 
-const CUZOR_KB = `
-[Cuzor Knowledge Base]
-`;
+const KNOWLEDGE_BASES = {
+  UPS: `Cuzor MiniUPS Specialist. 
+    Models: Lite (12V 2A, 19.2Wh, 4hr), Plus (12V 2A, 28Wh, 6hr), Pro (12V 3A, 32Wh, 8hr). 
+    Policy: 1-year replacement. ₹250 board fix for product in warranty and power ratings are mismatched. Doorstep battery swap program.`,
+  
+  GAN: `Cuzor Pulse 70W GaN Charger Specialist. 
+    Specs: 70W Max (Single Port), 45W + 25W (Dual Port). 2x USB-C. 
+    Tech: Navitas GaNSense Gen 4. Efficiency: 91%. 
+    LEDs: Fast blink (Full speed), Slow glow (Nearly full), Steady (Charged). 
+    Policy: 2-Year Doorstep Replacement Warranty.`
+};
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "CALL_LLM") {
-    // UPDATED for 2026: Using Gemini 2.5 Flash
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+    chrome.storage.local.get(['currentMode'], (result) => {
+      const mode = result.currentMode || 'UPS';
+      const selectedKB = KNOWLEDGE_BASES[mode];
 
-    const promptText = `${CUZOR_KB}\n\nCustomer Ticket: ${request.ticket}\nAgent Hint: ${request.agentHint}\n\nDraft a professional reply:`;
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+      
+      const body = {
+        contents: [{ parts: [{ text: `${selectedKB}\n\nTicket: ${request.ticket}\nHint: ${request.agentHint}\n\nDraft a professional Cuzor Labs reply with a helpful tone in simple chat format:` }] }]
+      };
 
-    fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: promptText }] }]
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
       })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+      .then(res => res.json())
+      .then(data => {
         const reply = data.candidates[0].content.parts[0].text;
         sendResponse({ success: true, suggestion: reply });
-      } else {
-        console.error("API Error Detail:", data);
-        sendResponse({ success: false, error: data.error?.message || "Model error." });
-      }
-    })
-    .catch(err => sendResponse({ success: false, error: err.message }));
-
+      })
+      .catch(err => sendResponse({ success: false, error: err.message }));
+    });
     return true; 
   }
 });
