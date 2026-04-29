@@ -1,4 +1,3 @@
-// content.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "GET_TICKET_DATA") {
     // 1. Try multiple possible targets

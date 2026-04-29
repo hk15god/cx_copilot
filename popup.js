@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            status.innerText = "AI is thinking (2.5 Flash)...";
+            status.innerText = "AI is thinking (Gemini 3.1 Flash)...";
 
             // STEP B: Send data to background.js for the LLM call
             chrome.runtime.sendMessage({
